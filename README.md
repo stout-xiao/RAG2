@@ -15,9 +15,7 @@ RAG2/
 ├── openai_client.py   # API客户端
 ├── main.py            # 主入口
 ├── evaluator.py       # 评估脚本
-├── data/
-│   ├── hotpotqa.json          # 完整数据集
-│   └── optimal_hotpotqa.json  # 高分样本（500条）
+├── data/              # 数据集
 ├── indexes/           # 索引存储
 └── output/            # 评估结果
 ```
