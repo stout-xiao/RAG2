@@ -55,6 +55,10 @@ def build_faiss_index(chunks: List[dict]) -> Tuple[faiss.Index, List[dict]]:
     index.hnsw.efSearch = cfg.faiss_ef_search
     index.add(vectors.astype("float32"))
 
+    # 创建索引目录
+    import os
+    os.makedirs(cfg.index_dir, exist_ok=True)
+    
     faiss.write_index(index, cfg.index_path)
     with open(cfg.meta_path, "w", encoding="utf-8") as f:
         json.dump(chunks, f, ensure_ascii=False, indent=2)

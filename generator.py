@@ -7,6 +7,7 @@ import time
 from typing import Callable, List, Optional
 
 from config import load_config
+from openai_client import call_mimo_api
 
 
 LLMFn = Callable[[str, Optional[str]], str]
@@ -16,8 +17,11 @@ class Generator:
     def __init__(self, call_fn: Optional[LLMFn] = None) -> None:
         cfg = load_config()
         self.cfg = cfg
-        self.call_fn = call_fn
-        self.system_prompt = "You are MiMo-V2-Flash tasked with multi-hop QA planning and grounded generation."
+        # Use call_mimo_api as default if no custom function provided
+        self.call_fn = call_fn or call_mimo_api
+        self.system_prompt = (
+            "You are an expert planner for multi-hop information retrieval."
+        )
         self._call_times: List[float] = []
 
     def _throttle(self) -> None:
@@ -40,37 +44,79 @@ class Generator:
 
     def decompose(self, question: str) -> List[str]:
         template = (
-            "分解多跳问题，输出 JSON 数组，每个元素是子问题字符串。"
-            "必须使用 [ANSWER_1], [ANSWER_2] 等占位符指代上一步答案。\n"
-            f"问题: {question}\n"
-            '示例输出: ["谁创建了[ANSWER_1]所在的公司?", "他出生在哪里?"]'
+            "Your task is to decompose a complex question into a sequence of simple, single-hop sub-questions that can be answered by retrieving documents.\n\n"
+            "IMPORTANT: You MUST always decompose into at least 2 sub-questions, even if the question seems simple.\n"
+            "The goal is planning, not answering.\n"
+            "You must NOT answer the question.\n"
+            "You must NOT use any external knowledge.\n\n"
+            "Instructions:\n"
+            "- Decompose the question into an ordered list of sub-questions (minimum 2).\n"
+            "- Each sub-question should be as simple and self-contained as possible.\n"
+            "- The answer to sub-question i should help answer sub-question i+1.\n"
+            "- If a sub-question depends on the answer of a previous one, use the placeholder \"[ANSWER_1]\", \"[ANSWER_2]\", etc.\n"
+            "- Do not include explanations, reasoning steps, or additional text.\n\n"
+            "Example 1:\n"
+            "Question: What is the birth city of the director of the film Inception?\n"
+            "Output: {\"decomposed_questions\": [\"Who is the director of the film Inception?\", \"What is the birth city of [ANSWER_1]?\"]}\n\n"
+            "Example 2:\n"
+            "Question: Where is the university located that the founder of Microsoft attended?\n"
+            "Output: {\"decomposed_questions\": [\"Who is the founder of Microsoft?\", \"Which university did [ANSWER_1] attend?\", \"Where is [ANSWER_2] located?\"]}\n\n"
+            "Output format:\n"
+            "Return ONLY a single JSON object with one key \"decomposed_questions\", whose value is a list of strings. No other text.\n\n"
+            f"Question:\n{question}\n\n"
+            "Output:"
         )
         try:
-            raw = self._call(template, self.system_prompt)
-            sub_questions = json.loads(raw)
-            if isinstance(sub_questions, list) and sub_questions:
+            raw = self._call(template, self.system_prompt).strip()
+            # Remove potential markdown code blocks
+            if raw.startswith("```"):
+                raw = raw.split("```")[1]
+                if raw.startswith("json"):
+                    raw = raw[4:].strip()
+            
+            # Try to parse as JSON with "decomposed_questions" key
+            parsed = json.loads(raw)
+            if isinstance(parsed, dict) and "decomposed_questions" in parsed:
+                sub_questions = parsed["decomposed_questions"]
+            elif isinstance(parsed, list):
+                sub_questions = parsed
+            else:
+                sub_questions = [question]
+            
+            if isinstance(sub_questions, list) and len(sub_questions) > 0:
                 return [str(s) for s in sub_questions]
-        except Exception:
+        except Exception as e:
+            print(f"Warning: Failed to decompose question: {e}")
             pass
         return [question]
 
     def grounded_generate(self, question: str, evidence: List[dict]) -> str:
         context_blocks = []
         for i, doc in enumerate(evidence):
-            context_blocks.append(f"[{i}] {doc.get('doc_title','')} :: {doc.get('text','')}")
-        context = "\n".join(context_blocks)
+            context_blocks.append(f"Document {i+1}:\nTitle: {doc.get('doc_title','')}\nContent: {doc.get('text','')}")
+        context = "\n\n".join(context_blocks)
+        
         prompt = (
-            "仅基于 Provided Context 回答，不得凭空臆测。"
-            "请列出简短推理步骤，再给出最终答案。\n"
-            f"Question: {question}\n"
-            f"Provided Context:\n{context}\n"
-            "Answer format:\nSteps: <step1>; <step2>; ...\nFinal Answer: <text>"
+            "You are a factual question answering system.\n"
+            "Answer the question strictly based on the provided documents.\n"
+            "Do not use any external knowledge or assumptions.\n\n"
+            "If the documents do not contain sufficient information to answer the question, "
+            "explicitly state what information is missing.\n"
+            "Do not hallucinate.\n\n"
+            f"Context:\n{context}\n\n"
+            "Instruction:\n"
+            "Based only on the above context, synthesize the answer to the question.\n"
+            "Your answer should be concise, accurate, and grounded in the given documents.\n\n"
+            f"Question:\n{question}\n\n"
+            "Answer:"
         )
         if not self.call_fn:
             steps = "; ".join([doc.get("doc_title", "") for doc in evidence][:2])
             guess = evidence[0]["text"] if evidence else ""
             return f"Steps: {steps}\nFinal Answer: {guess}"
-        return self._call(prompt, self.system_prompt)
+        
+        system = "You are a factual question answering system."
+        return self._call(prompt, system)
 
     def extract_bridge(self, sub_question: str, docs: List[dict]) -> str:
         best_text = docs[0]["text"] if docs else ""

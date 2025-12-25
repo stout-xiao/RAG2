@@ -6,8 +6,9 @@ import torch
 
 @dataclass
 class AppConfig:
-    api_base: str = os.getenv("GENERATOR_API_BASE", "")
-    api_key: str = os.getenv("GENERATOR_API_KEY", "")
+    api_base: str = os.getenv("GENERATOR_API_BASE", "https://api.xiaomimimo.com/v1")
+    api_key: str = os.getenv("MIMO_API_KEY", "sk-syops79rvoro9avlt40yvl1jloo68asj0oqvwuwj9nkzyh9t")
+    model_name: str = os.getenv("MODEL_NAME", "mimo-v2-flash")
     lambda_weight: float = 0.5
     tau_min: float = 0.1
     hotpot_chunk_size: int = 4
@@ -21,8 +22,9 @@ class AppConfig:
     device: str = field(default_factory=lambda: "cuda" if torch.cuda.is_available() else "cpu")
     fp16: bool = True
     rate_limit_per_min: int = 30
-    index_path: str = "faiss.index"
-    meta_path: str = "faiss_meta.json"
+    index_dir: str = "indexes"
+    index_path: str = "indexes/faiss.index"
+    meta_path: str = "indexes/faiss_meta.json"
 
 
 def load_config() -> AppConfig:

@@ -45,9 +45,21 @@ def solve_question(
 
 
 if __name__ == "__main__":
+    import os
+    
     # Example usage (requires prebuilt index and configured LLM callable)
     cfg = load_config()
-    sample_question = "Who founded the company that created the HTTP protocol?"
+    
+    # 检查索引是否已存在，避免重复构建
+    index_path = "indexes/faiss.index"
+    if not os.path.exists(index_path):
+        print("索引不存在，正在构建 FAISS 索引...")
+        prepare_index("data/hotpotqa.json")
+        print("索引构建完成！\n")
+    else:
+        print("索引已存在，跳过构建。\n")
+    
+    sample_question = "Where is the ice hockey team based that Zdeno Chára currently serving as captain of?"
     answer, evidence, state = solve_question(sample_question)
     print("Answer:", answer)
     print("State:", state)

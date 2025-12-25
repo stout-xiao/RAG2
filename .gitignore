@@ -45,6 +45,7 @@ venv.bak/
 faiss.index
 faiss_meta.json
 *.index
+indexes/
 
 # Logs
 *.log
