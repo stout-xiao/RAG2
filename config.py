@@ -2,6 +2,10 @@
 from dataclasses import dataclass, field
 import os
 import torch
+from dotenv import load_dotenv
+
+# 从 .env 文件加载环境变量
+load_dotenv()
 
 
 @dataclass
