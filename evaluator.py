@@ -17,7 +17,13 @@ from __future__ import annotations
 import json
 import os
 import re
+import warnings
+import logging
 from typing import Dict, Iterable, Tuple
+
+# 抑制 transformers 模型加载警告
+warnings.filterwarnings("ignore", message="Some weights of the model checkpoint")
+logging.getLogger("transformers").setLevel(logging.ERROR)
 
 from main import solve_question
 
@@ -349,7 +355,7 @@ def save_evaluation_excel(results: Dict[str, any], output_path: str) -> None:
         ],
     ]
     
-    # 保存为CSV（Excel可直接打开）
+    # 保存为CSV
     with open(output_path, "w", encoding="utf-8-sig", newline="") as f:
         writer = csv.writer(f)
         writer.writerows(report_data)
