@@ -7,7 +7,7 @@ import torch
 @dataclass
 class AppConfig:
     api_base: str = os.getenv("GENERATOR_API_BASE", "https://api.xiaomimimo.com/v1")
-    api_key: str = os.getenv("MIMO_API_KEY", "sk-syops79rvoro9avlt40yvl1jloo68asj0oqvwuwj9nkzyh9t")
+    api_key: str = os.getenv("MIMO_API_KEY", "API KEY")
     model_name: str = os.getenv("MODEL_NAME", "mimo-v2-flash")
     lambda_weight: float = 0.5
     tau_min: float = 0.1
