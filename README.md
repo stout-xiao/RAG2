@@ -21,6 +21,9 @@ RAG2/
 ├── indexes/           # 索引存储
 └── output/            # 评估结果
 ```
+## MiMo-V2-Flash api限时免费
+
+地址：https://platform.xiaomimimo.com/#/console
 
 ## 快速开始
 
