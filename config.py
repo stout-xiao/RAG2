@@ -11,7 +11,7 @@ load_dotenv()
 @dataclass
 class AppConfig:
     api_base: str = os.getenv("GENERATOR_API_BASE", "https://api.xiaomimimo.com/v1")
-    api_key: str = os.getenv("MIMO_API_KEY", "API KEY")
+    api_key: str = os.getenv("MIMO_API_KEY", "")  # 从 .env 文件读取
     model_name: str = os.getenv("MODEL_NAME", "mimo-v2-flash")
     lambda_weight: float = 0.5
     tau_min: float = 0.1
