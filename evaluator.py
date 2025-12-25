@@ -304,6 +304,59 @@ def save_evaluation_results(results: Dict[str, any], output_path: str) -> None:
     print(f"评估结果已保存到: {output_path}")
 
 
+def save_evaluation_excel(results: Dict[str, any], output_path: str) -> None:
+    """保存评估报告到Excel文件"""
+    import csv
+    
+    # 确保输出目录存在
+    output_dir = os.path.dirname(output_path)
+    if output_dir and not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+    
+    if not results["samples"]:
+        print("没有评估结果，跳过Excel导出")
+        return
+    
+    # 计算统计信息
+    avg = results["average_metrics"]
+    contain_scores = results["metrics"]["contain_acc"]
+    f1_scores = results["metrics"]["f1_score"]
+    rouge_scores = results["metrics"]["rouge_l"]
+    
+    # 构建报告数据
+    report_data = [
+        ["指标", "平均值", "最小值", "最大值", "中位数"],
+        [
+            "Contain-ACC",
+            f"{avg['contain_acc']:.4f}",
+            f"{min(contain_scores):.4f}",
+            f"{max(contain_scores):.4f}",
+            f"{sorted(contain_scores)[len(contain_scores)//2]:.4f}"
+        ],
+        [
+            "F1-Score",
+            f"{avg['f1_score']:.4f}",
+            f"{min(f1_scores):.4f}",
+            f"{max(f1_scores):.4f}",
+            f"{sorted(f1_scores)[len(f1_scores)//2]:.4f}"
+        ],
+        [
+            "ROUGE-L",
+            f"{avg['rouge_l']:.4f}",
+            f"{min(rouge_scores):.4f}",
+            f"{max(rouge_scores):.4f}",
+            f"{sorted(rouge_scores)[len(rouge_scores)//2]:.4f}"
+        ],
+    ]
+    
+    # 保存为CSV（Excel可直接打开）
+    with open(output_path, "w", encoding="utf-8-sig", newline="") as f:
+        writer = csv.writer(f)
+        writer.writerows(report_data)
+    
+    print(f"评估报告已保存到: {output_path}")
+
+
 def main():
     """主评估函数"""
     import argparse
@@ -348,6 +401,10 @@ def main():
     
     # 保存结果
     save_evaluation_results(results, args.output)
+    
+    # 保存Excel报告
+    excel_path = args.output.replace(".json", ".csv")
+    save_evaluation_excel(results, excel_path)
 
 
 if __name__ == "__main__":
