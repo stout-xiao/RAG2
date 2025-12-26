@@ -61,5 +61,6 @@ Thumbs.db
 .cache/
 models/
 
-# Large data files (optional - uncomment if needed)
-# data/
+# Large data files
+data/
+outputs/

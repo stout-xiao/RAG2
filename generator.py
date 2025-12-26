@@ -100,15 +100,16 @@ class Generator:
             "You are a factual question answering system.\n"
             "Answer the question strictly based on the provided documents.\n"
             "Do not use any external knowledge or assumptions.\n\n"
-            "If the documents do not contain sufficient information to answer the question, "
-            "explicitly state what information is missing.\n"
-            "Do not hallucinate.\n\n"
+            "CRITICAL INSTRUCTIONS:\n"
+            "- Output ONLY the answer itself, nothing else.\n"
+            "- Do NOT include phrases like 'Based on the documents', 'According to', 'The answer is', etc.\n"
+            "- Do NOT provide explanations or reasoning.\n"
+            "- Keep the answer as SHORT as possible (ideally 1-5 words).\n"
+            "- If the answer is a name, date, number, or entity, output just that.\n"
+            "- If you cannot find the answer in the documents, output only: 'unknown'\n\n"
             f"Context:\n{context}\n\n"
-            "Instruction:\n"
-            "Based only on the above context, synthesize the answer to the question.\n"
-            "Your answer should be concise, accurate, and grounded in the given documents.\n\n"
             f"Question:\n{question}\n\n"
-            "Answer:"
+            "Answer (output ONLY the answer, no explanation):"
         )
         if not self.call_fn:
             steps = "; ".join([doc.get("doc_title", "") for doc in evidence][:2])
@@ -125,9 +126,15 @@ class Generator:
             return match.group(1) if match else best_text.split(" ")[0:3][0] if best_text else ""
 
         prompt = (
-            "从检索证据中提取可用于下一跳检索的锚点实体，保持简短。\n"
-            f"子问题: {sub_question}\n"
-            f"证据: {best_text}"
+            "Extract the key entity from the evidence that can be used for the next retrieval hop.\n\n"
+            "CRITICAL INSTRUCTIONS:\n"
+            "- Output ONLY the entity name, nothing else.\n"
+            "- Do NOT include explanations, reasoning, or additional text.\n"
+            "- The entity should be a person name, place name, organization, date, or other proper noun.\n"
+            "- Keep it as SHORT as possible (1-5 words maximum).\n\n"
+            f"Sub-question: {sub_question}\n"
+            f"Evidence: {best_text}\n\n"
+            "Bridge entity (output ONLY the entity):"
         )
         try:
             return self._call(prompt, self.system_prompt).strip()
