@@ -63,4 +63,4 @@ models/
 
 # Large data files
 data/
-outputs/
+output/
