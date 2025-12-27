@@ -29,8 +29,8 @@ def infer_dataset_name(file_path: str) -> str:
     name = Path(file_path).name.lower()
     if "hotpot" in name:
         return "hotpotqa"
-    if "musique" in name:
-        return "musique"
+    #if "musique" in name:
+    #    return "musique"
     return "generic"
 
 
@@ -78,8 +78,8 @@ def _yield_documents(example: Dict, dataset_name: str) -> Iterable[Tuple[str, Li
 def process_dataset(file_path: str) -> List[Dict]:
     cfg = load_config()
     dataset_name = infer_dataset_name(file_path)
-    size = cfg.hotpot_chunk_size if dataset_name == "hotpotqa" else cfg.musique_chunk_size
-    overlap = cfg.hotpot_chunk_overlap if dataset_name == "hotpotqa" else cfg.musique_chunk_overlap
+    size = cfg.hotpot_chunk_size  # if dataset_name == "hotpotqa" else cfg.musique_chunk_size
+    overlap = cfg.hotpot_chunk_overlap  # if dataset_name == "hotpotqa" else cfg.musique_chunk_overlap
 
     with open(file_path, "r", encoding="utf-8") as f:
         data = json.load(f)

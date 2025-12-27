@@ -35,7 +35,11 @@ def solve_question(
     for i, sq in enumerate(sub_questions):
         resolved_sq = tracker.resolve(sq)
         candidates = retriever.search(resolved_sq)
-        filtered_docs = gate.logical_gate(resolved_sq, candidates)
+        # 消融实验：根据配置决定是否使用 filter
+        if cfg.use_filter:
+            filtered_docs = gate.logical_gate(resolved_sq, candidates)
+        else:
+            filtered_docs = candidates  # 不过滤，直接使用检索结果
         evidence_pool.extend(filtered_docs)
         bridge_entity = generator.extract_bridge(resolved_sq, filtered_docs)
         tracker.update(f"ANSWER_{i+1}", bridge_entity)

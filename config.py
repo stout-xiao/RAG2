@@ -15,10 +15,11 @@ class AppConfig:
     model_name: str = os.getenv("MODEL_NAME", "mimo-v2-flash")
     lambda_weight: float = 0.5
     tau_min: float = 0.1
+    use_filter: bool = True  # 消融实验开关：设为 False 可禁用 filter 框架
     hotpot_chunk_size: int = 4
     hotpot_chunk_overlap: int = 1
-    musique_chunk_size: int = 3
-    musique_chunk_overlap: int = 1
+    #musique_chunk_size: int = 3
+    #musique_chunk_overlap: int = 1
     embed_model: str = os.getenv("EMBED_MODEL", "facebook/contriever-msmarco")
     nli_model: str = os.getenv("NLI_MODEL", "microsoft/deberta-large-mnli")
     faiss_m: int = 32
