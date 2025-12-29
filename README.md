@@ -1,6 +1,6 @@
-# RAG^2（Recursive & Refined RAG）
+# RAG2
 
-单卡环境下的多跳问答流水线：云端大模型规划与循证生成，本地语义检索 + NLI 逻辑门控。
+轻量化多跳问答RAG框架：云端大模型规划与循证生成，本地语义检索 + NLI 逻辑门控。
 
 ## 目录结构
 
@@ -47,6 +47,9 @@ python evaluator.py --sample-size 50
 
 # 指定输出
 python evaluator.py --output output/results.json
+
+# 消融实验（config.py）
+use_filter: bool = True  # 设为 False 可禁用 filter 框架
 ```
 
 **指标：** Contain-ACC | F1-Score | ROUGE-L
