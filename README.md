@@ -48,6 +48,9 @@ python evaluator.py --sample-size 50
 # 指定输出
 python evaluator.py --output output/results.json
 
+# 基线实验
+use_retrieval: bool = True  # 设为 False 可禁用检索，直接让 LLM 回答
+
 # 消融实验（config.py）
 use_filter: bool = True  # 设为 False 可禁用 filter 框架
 ```
