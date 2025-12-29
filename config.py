@@ -16,6 +16,7 @@ class AppConfig:
     lambda_weight: float = 0.5
     tau_min: float = 0.1
     use_filter: bool = True  # 消融实验开关：设为 False 可禁用 filter 框架
+    use_retrieval: bool = True  # 无检索基线实验开关：设为 False 可禁用检索，直接让 LLM 回答
     hotpot_chunk_size: int = 4
     hotpot_chunk_overlap: int = 1
     #musique_chunk_size: int = 3

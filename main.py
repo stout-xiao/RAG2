@@ -24,9 +24,15 @@ def solve_question(
     generator: Generator | None = None,
 ) -> Tuple[str, list, dict]:
     cfg = load_config()
+    generator = generator or Generator()
+
+    # 无检索基线实验：直接让 LLM 回答，不使用任何文档
+    if not cfg.use_retrieval:
+        final_answer = generator.direct_answer(question)
+        return final_answer, [], {}
+
     retriever = retriever or Retriever()
     gate = gate or LogicalGateFilter()
-    generator = generator or Generator()
 
     sub_questions = generator.decompose(question)
     evidence_pool = []

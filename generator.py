@@ -140,3 +140,19 @@ class Generator:
             return self._call(prompt, self.system_prompt).strip()
         except Exception:
             return ""
+
+    def direct_answer(self, question: str) -> str:
+        """无检索基线：直接让 LLM 使用自身知识回答问题"""
+        prompt = (
+            "Answer the following question directly.\n\n"
+            "CRITICAL INSTRUCTIONS:\n"
+            "- Output ONLY the answer itself, nothing else.\n"
+            "- Do NOT include phrases like 'The answer is', 'I think', etc.\n"
+            "- Do NOT provide explanations or reasoning.\n"
+            "- Keep the answer as SHORT as possible (ideally 1-5 words).\n"
+            "- If the answer is a name, date, number, or entity, output just that.\n\n"
+            f"Question:\n{question}\n\n"
+            "Answer (output ONLY the answer, no explanation):"
+        )
+        system = "You are a factual question answering system."
+        return self._call(prompt, system)
