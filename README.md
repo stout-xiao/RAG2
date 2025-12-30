@@ -2,6 +2,8 @@
 
 轻量化多跳问答RAG框架：云端大模型规划与循证生成，本地语义检索 + NLI 逻辑门控。
 
+![alt text](Framework_of_RAG2/RAG2.png)
+
 ## 目录结构
 
 ```
