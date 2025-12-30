@@ -47,6 +47,7 @@ python evaluator.py --sample-size 50
 
 # 指定输出
 python evaluator.py --output output/results.json
+```
 
 ## 消融实验配置
 
