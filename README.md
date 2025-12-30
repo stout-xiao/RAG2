@@ -48,12 +48,22 @@ python evaluator.py --sample-size 50
 # 指定输出
 python evaluator.py --output output/results.json
 
-# 基线实验
-use_retrieval: bool = True  # 设为 False 可禁用检索，直接让 LLM 回答
+## 消融实验配置
 
-# 消融实验（config.py）
-use_filter: bool = True  # 设为 False 可禁用 filter 框架
-```
+在 `config.py` 中通过以下开关控制消融实验：
+
+| 实验类型 | `use_retrieval` | `use_decomposition` | `use_filter` |
+|---------|-----------------|---------------------|--------------|
+| 完整 RAG | `True` | `True` | `True` |
+| 无 Filter | `True` | `True` | `False` |
+| 无问题分解 | `True` | `False` | `True` |
+| 无分解+无 Filter | `True` | `False` | `False` |
+| 无检索基线 | `False` | - | - |
+
+**配置说明：**
+- `use_retrieval`: 设为 `False` 禁用检索，直接让 LLM 使用自身知识回答
+- `use_decomposition`: 设为 `False` 禁用问题分解，直接用原问题检索
+- `use_filter`: 设为 `False` 禁用 NLI 逻辑门控过滤
 
 **指标：** Contain-ACC | F1-Score | ROUGE-L
 

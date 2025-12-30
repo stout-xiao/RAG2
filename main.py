@@ -34,7 +34,12 @@ def solve_question(
     retriever = retriever or Retriever()
     gate = gate or LogicalGateFilter()
 
-    sub_questions = generator.decompose(question)
+    # 消融实验：根据配置决定是否分解问题
+    if cfg.use_decomposition:
+        sub_questions = generator.decompose(question)
+    else:
+        sub_questions = [question]  # 不分解，直接用原问题
+
     evidence_pool = []
     tracker = StateTracker()
 
@@ -47,8 +52,10 @@ def solve_question(
         else:
             filtered_docs = candidates  # 不过滤，直接使用检索结果
         evidence_pool.extend(filtered_docs)
-        bridge_entity = generator.extract_bridge(resolved_sq, filtered_docs)
-        tracker.update(f"ANSWER_{i+1}", bridge_entity)
+        # 不分解时跳过 bridge entity 提取
+        if cfg.use_decomposition:
+            bridge_entity = generator.extract_bridge(resolved_sq, filtered_docs)
+            tracker.update(f"ANSWER_{i+1}", bridge_entity)
 
     final_answer = generator.grounded_generate(question, evidence_pool)
     return final_answer, evidence_pool, tracker.state

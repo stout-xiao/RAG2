@@ -17,6 +17,7 @@ class AppConfig:
     tau_min: float = 0.1
     use_filter: bool = True  # 消融实验开关：设为 False 可禁用 filter 框架
     use_retrieval: bool = True  # 无检索基线实验开关：设为 False 可禁用检索，直接让 LLM 回答
+    use_decomposition: bool = True  # 问题分解消融开关：设为 False 可禁用问题分解，直接用原问题检索
     hotpot_chunk_size: int = 4
     hotpot_chunk_overlap: int = 1
     #musique_chunk_size: int = 3
